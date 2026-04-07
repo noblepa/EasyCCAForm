@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Easy CCA Form Generator</title>
+
+<style>
+body {
+  font-family: Arial;
+  margin: 40px;
+}
+
+h2 {
+  text-align: center;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background: #2c3e50;
+  color: white;
+}
+
+/* Zebra rows */
+tr:nth-child(even) td {
+  background-color: #f2f6fc;
+}
+
+/* Info layout */
+.info-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.info-item {
+  width: 50%;
+  margin-bottom: 6px;
+}
+
+/* Signature */
+.sign {
+  margin-top: 60px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Print settings */
+@media print {
+  button, select, label {
+    display: none;
+  }
+}
+</style>
+
+</head>
+
+<body>
+
+<h2>MAHATMA GANDHI UNIVERSITY, KOTTAYAM</h2>
+
+<div class="info-container">
+  <div class="info-item"><b>Name of the College:</b> {{form.college}}</div>
+  <div class="info-item"><b>Academic Year:</b> {{form.year}}</div>
+
+  <div class="info-item"><b>Course Code:</b> {{form.course_code}}</div>
+  <div class="info-item"><b>Name of the Course:</b> {{form.course_name}}</div>
+
+  <div class="info-item"><b>Semester:</b> {{form.semester}}</div>
+  <div class="info-item"><b>Number of Course Outcomes:</b> {{num_cos}}</div>
+
+  <div class="info-item"><b>CCA Component Type (Theory/Practical):</b> {{form.category}}</div>
+  <div class="info-item"><b>Total Number of Students Enrolled for this Course:</b> {{num_students}}</div>
+</div>
+
+<!-- SELECT OPTION -->
+<label><b>Select Section for PDF (Adjust print scaling to about 75%):</b></label>
+<select id="printOption" style="margin-left:10px; padding:5px;">
+  <option value="part2">Part II (CCA Form A)</option>
+  <option value="part1">Part I (Normalized Marks)</option>
+</select>
+
+<!-- BUTTON -->
+<button onclick="downloadPDF()" style="margin-top:20px; padding:8px 16px;">
+Download as PDF
+</button>
+
+<script>
+function downloadPDF() {
+  let option = document.getElementById("printOption").value;
+
+  let part1 = document.getElementById("part1-section");
+  let part2 = document.getElementById("part2-section");
+
+  if (option === "part1") {
+    part1.style.display = "block";
+    part2.style.display = "none";
+  } else {
+    part1.style.display = "none";
+    part2.style.display = "block";
+  }
+
+  window.print();
+
+  // Restore after printing
+  part1.style.display = "block";
+  part2.style.display = "block";
+}
+</script>
+
+<br>
+
+<!-- ================= PART II ================= -->
+<div id="part2-section">
+
+<h3>CCA Form A – Part II</h3>
+
+<table>
+<tr>
+<th>CO Number</th>
+{% for co in co_columns %}
+<th>{{co}}</th>
+{% endfor %}
+<th>Total Marks Allocated for CCA</th>
+</tr>
+
+<tr>
+<th>Evaluation Method(s) Used</th>
+{% for e in eval_list %}
+<td>{{e}}</td>
+{% endfor %}
+<td></td>
+</tr>
+
+<tr>
+<th>Maximum Marks Allocated</th>
+{% for m in max_marks %}
+<td>{{ m | round(0) | int }}</td>
+{% endfor %}
+<td>{{total_cca_max | round(0) | int }}</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<th>SL. No.</th>
+<th>Register Number</th>
+<th>Name of the Student</th>
+
+{% for co in co_columns %}
+<th>Marks Obtained in {{co}}</th>
+{% endfor %}
+
+<th>Total Marks Obtained in CCA</th>
+</tr>
+
+{% for row in table2.values.tolist() %}
+<tr>
+{% for i in range(row|length) %}
+  {% if i == (row|length - 1) %}
+    <td>{{ row[i] | round(0) | int }}</td>
+  {% else %}
+    <td>{{ row[i] }}</td>
+  {% endif %}
+{% endfor %}
+</tr>
+{% endfor %}
+</table>
+
+<p><b>Certified that,</b><br>
+(1) The entries are verified with the records and there is no error or omission.<br>
+(2) These assessments were published and no grievances are pending.
+</p>
+
+<div class="sign">
+  <div>Course Faculty/Course Coordinator</div>
+  <div>HoD</div>
+  <div>Principal</div>
+  <div>College Seal</div>
+</div>
+
+</div>
+
+<!-- ================= PART I ================= -->
+<div id="part1-section">
+
+<h3>CCA Form A – Part I </h3>
+{{table1|safe}}
+
+<p><b>Certified that,</b><br>
+(1) The entries are verified with the records and there is no error or omission.<br>
+(2) These assessments were published and no grievances are pending.
+</p>
+
+<div class="sign">
+  <div>Course Faculty/Course Coordinator</div>
+  <div>HoD</div>
+  <div>Principal</div>
+  <div>College Seal</div>
+</div>
+
+</div>
+
+
+
+</body>
+</html>
