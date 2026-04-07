@@ -8,6 +8,7 @@ In many cases, assessments are conducted for **larger raw marks** (for example, 
 
 This tool automatically **normalizes the raw marks to the required CCA scale** and produces an output that can be directly used while preparing the **final CCA statement**.
 
+You can see this hosted at https://easycca.pythonanywhere.com/
 ---
 
 ## Features
