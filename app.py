@@ -1,30 +1,27 @@
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, send_file
 import os
+import tempfile
 
 from formatter import process_file
 
 app = Flask(__name__)
-
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
 
-from flask import send_file
-import os
-
 @app.route('/download-template')
 def download_template():
-    path = os.path.join('static', 'marks_template.xlsx')  # adjust path if needed
+    path = os.path.join('static', 'marks_template.xlsx')
     return send_file(path, as_attachment=True)
 
-# ✅ Process File
+
+# Process File (NO RETENTION)
 @app.route("/process", methods=["POST"])
 def process():
+    temp_path = None  # track temp file for cleanup
+
     try:
         # Form data
         form_data = {
@@ -41,10 +38,13 @@ def process():
         if not file or file.filename == "":
             return "<h3>No file uploaded</h3>"
 
-        filepath = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(filepath)
+        # Create temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as temp:
+            file.save(temp.name)
+            temp_path = temp.name
 
-        result = process_file(filepath)
+        # Process file
+        result = process_file(temp_path)
 
         return render_template(
             "preview.html",
@@ -62,6 +62,7 @@ def process():
     except Exception as e:
         return f"<h3>Error:</h3><pre>{str(e)}</pre>"
 
-
-if __name__ == "__main__":
-    app.run(debug=True)
+    finally:
+        # DELETE FILE IMMEDIATELY
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)
